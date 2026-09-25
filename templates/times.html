@@ -7,9 +7,9 @@
             <h1>Times</h1>
             <p class="subtitulo">Cadastro dos times do interclasse</p>
         </div>
-        {% if not editar %}
+
         <a href="{{ url_for('novo_time') }}" class="botao">+ Novo Time</a>
-        {% endif %}
+
     </div>
 
     {% if request.endpoint == 'novo_time' %}
@@ -22,9 +22,21 @@
                     <input type="text" id="nome" name="nome" required>
                 </div>
                 <div class="campo campo-cor">
-                    <label for="cor">Cor</label>
-                    <input type="text" id="cor" name="cor" placeholder="Ex: Azul">
+                    <label for="turma">Turma</label>
+                    <select name="turma" id="turma">
+                        <option value="6 Ano">6º Ano</option>
+                        <option value="7 Ano">7º Ano</option>
+                        <option value="8 Ano">8º Ano</option>
+                        <option value="9 Ano">9º Ano</option>
+                        <option value="10 Ano">1º Médio</option>
+                        <option value="11 Ano">2º Médio</option>
+                        <option value="12 Ano">3º Médio</option>
+                    </select>
                 </div>
+            </div>
+            <div class="campo">
+                <label for="responsavel">Responsável do Time</label>
+                <input type="text" id="responsavel" name="responsavel">
             </div>
             <div class="acoes-form">
                 <button type="submit" class="botao">Cadastrar</button>
@@ -38,7 +50,22 @@
         <h2>Lista de Times</h2>
         {% if times %}
         <table>
-<!--           Insira sua tabela aqui -->
+            <thead>
+                <tr>
+                    <th scope="col">Nome</th>
+                    <th scope="col">Turma</th>
+                    <th scope="col">Responsável</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for time in times %}
+                    <tr>
+                        <td>{{ time.nome }}</td>
+                        <td>{{ time.turma }}</td>
+                        <td>{{ time.responsavel }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
         </table>
         {% else %}
             <p class="vazio">Nenhum time cadastrado ainda.</p>
