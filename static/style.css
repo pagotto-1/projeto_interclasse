@@ -232,6 +232,21 @@ tbody tr:hover {
     background-color: #f1f3f5;
 }
 
+.excluir {
+    background-color: var(--cor-erro)
+}
+
+.excluir:hover {
+    background-color: #a50000;
+}
+
+.cabecalho {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: space-between;
+}
+
 /* FORMULÁRIOS */
 .formulario {
     border-left: 3px solid var(--cor-primaria);

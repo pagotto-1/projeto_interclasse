@@ -7,9 +7,12 @@
             <h1>Times</h1>
             <p class="subtitulo">Cadastro dos times do interclasse</p>
         </div>
-        {% if not editar %}
-        <a href="{{ url_for('novo_time') }}" class="botao">+ Novo Time</a>
-        {% endif %}
+
+        <div class="linha-campos">
+            <a href="{{ url_for('novo_time') }}" class="botao">+ Novo Time</a>
+            <a href="{{ url_for('listar_times_excluidos') }}" class="botao">Times Excluídos</a>
+        </div>
+
     </div>
 
     {% if request.endpoint == 'novo_time' %}
@@ -22,9 +25,17 @@
                     <input type="text" id="nome" name="nome" required>
                 </div>
                 <div class="campo campo-cor">
-                    <label for="cor">Cor</label>
-                    <input type="text" id="cor" name="cor" placeholder="Ex: Azul">
+                    <label for="turma">Turma</label>
+                    <select name="turma" id="turma">
+                        {% for turma in lista_turmas %}
+                        <option value="{{ turma }}">{{ turma }}</option>
+                        {% endfor %}
+                    </select>
                 </div>
+            </div>
+            <div class="campo">
+                <label for="responsavel">Responsável do Time</label>
+                <input type="text" id="responsavel" name="responsavel">
             </div>
             <div class="acoes-form">
                 <button type="submit" class="botao">Cadastrar</button>
@@ -34,14 +45,100 @@
     </section>
     {% endif %}
 
-    <section class="painel">
-        <h2>Lista de Times</h2>
-        {% if times %}
-        <table>
-<!--           Insira sua tabela aqui -->
-        </table>
-        {% else %}
-            <p class="vazio">Nenhum time cadastrado ainda.</p>
-        {% endif %}
+    {% if request.endpoint == 'alterar-time' %}
+    <section class="painel formulario">
+        <h2>Alterar Time</h2>
+        <form method="POST" action="{{ url_for('alterar_time') }}">
+            <div class="linha-campos">
+                <div class="campo">
+                    <label for="nome">Nome do Time *</label>
+                    <input type="text" id="nome_alterar" name="nome" required>
+                </div>
+                <div class="campo campo-cor">
+                    <label for="turma">Turma</label>
+                    <select name="turma" id="turma_alterar">
+                        {% for turma in lista_turmas %}
+                        <option value="{{ turma }}">{{ turma }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="campo">
+                <label for="responsavel">Responsável do Time</label>
+                <input type="text" id="responsavel_alterar" name="responsavel">
+            </div>
+            <div class="acoes-form">
+                <button type="submit" class="botao">Cadastrar</button>
+                <a href="{{ url_for('listar_times') }}" class="botao botao-secundario">Cancelar</a>
+            </div>
+        </form>
     </section>
+    {% endif %}
+
+    {% if request.endpoint == 'listar_times' %}
+        <section class="painel">
+            <h2>Lista de Times</h2>
+            {% if times %}
+            <table>
+                <thead>
+                    <tr>
+                        <th scope="col">ID</th>
+                        <th scope="col">Nome</th>
+                        <th scope="col">Turma</th>
+                        <th scope="col">Responsável</th>
+                        <th scope="col">Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for time in times %}
+                        <tr>
+                            <td>{{ time.id }}</td>
+                            <td>{{ time.nome }}</td>
+                            <td>{{ time.turma }}</td>
+                            <td>{{ time.responsavel }}</td>
+                            <td><a href="{{ url_for('excluir_time', time_id=time.id) }}" class="botao excluir">Excluir</a> <a href="{{ url_for('alterar_time', time_id=time.id) }}" class="botao">Alterar</a></td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+                <p class="vazio">Nenhum time cadastrado ainda.</p>
+            {% endif %}
+        </section>
+    {% endif %}
+
+    {% if request.endpoint == 'listar_times_excluidos' %}
+        <section class="painel">
+            <div class="cabecalho">
+                <h2>Lista de Times Excluídos</h2>
+                <a href="{{ url_for('listar_times') }}" class="botao">Voltar</a>
+            </div>
+            {% if times %}
+                <table>
+                <thead>
+                    <tr>
+                        <th scope="col">ID</th>
+                        <th scope="col">Nome</th>
+                        <th scope="col">Turma</th>
+                        <th scope="col">Responsável</th>
+                        <th scope="col">Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for time in times %}
+                        <tr>
+                            <td>{{ time.id }}</td>
+                            <td>{{ time.nome.capitalize() }}</td>
+                            <td>{{ time.turma }}</td>
+                            <td>{{ time.responsavel.capitalize() }}</td>
+                            <td><a href="{{ url_for('resgatar_time', time_id=time.id) }}" class="botao">Resgatar</a></td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+                <p class="vazio">Nenhum time excluído ainda.</p>
+            {% endif %}
+        </section>
+    {% endif %}
 {% endblock %}
