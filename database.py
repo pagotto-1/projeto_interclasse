@@ -1,7 +1,7 @@
 from sqlalchemy import create_engine, Column, Integer, String, ForeignKey, Date
 from sqlalchemy.orm import declarative_base, relationship, sessionmaker, scoped_session
 
-engine = create_engine("mysql+pymysql://root:senaisp@localhost:3306/interclasse_db")
+engine = create_engine("mysql+pymysql://root:Arthur_Pagotto1@localhost:3306/interclasse_db")
 
 SessionLocal = scoped_session(sessionmaker(bind=engine))
 

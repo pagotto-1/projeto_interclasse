@@ -8,8 +8,7 @@ app.secret_key = "lana-linda-incrivel-maravilhosa"
 
 @app.route("/")
 def dashboard():
-    times_sql = select(Time)
-    lista_times = SessionLocal.execute(times_sql).scalars().all()
+    lista_times = SessionLocal.execute(select(Time)).scalars().all()
 
     return render_template(
         "dashboard.html",
@@ -103,8 +102,7 @@ def novo_time():
             flash('Erro inesperado', 'error')
             return redirect(url_for('novo_time'))
 
-    times_sql = select(Time)
-    lista_times = SessionLocal.execute(times_sql).scalars().all()
+    lista_times = SessionLocal.execute(select(Time)).scalars().all()
 
     print(lista_times)
 
