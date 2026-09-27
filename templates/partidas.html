@@ -24,13 +24,18 @@
                 <div class="campo">
                     <label for="time_casa_id">Time da Casa *</label>
                     <select id="time_casa_id" name="time_casa_id" required>
-                        <option value="">Selecione</option>
+                        {% for time in times %}
+                            <option value="{{ time.id }}">{{ time.nome }}</option>
+                        {% endfor %}
                     </select>
                 </div>
                 <div class="campo">
                     <label for="time_visitante_id">Time Visitante *</label>
                     <select id="time_visitante_id" name="time_visitante_id" required>
                         <option value="">Selecione</option>
+                        {% for time in times %}
+                            <option value="{{ time.id }}">{{ time.nome }}</option>
+                        {% endfor %}
                     </select>
                 </div>
             </div>
@@ -63,7 +68,26 @@
         <h2>Lista de Partidas</h2>
         {% if partidas %}
         <table>
-<!--            Insira sua tabela aqui  -->
+            <thead>
+                <tr>
+                    <th scope="col">Time da Casa</th>
+                    <th scope="col">Gols da Casa</th>
+                    <th scope="col">Time Visitante</th>
+                    <th scope="col">Gols do Visitante</th>
+                    <th scope="col">Data</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for partida in partidas %}
+                <tr>
+                    <td>{{ times[partida.time_casa_id - 1].nome }}</td>
+                    <td>{{ partida.gols_casa }}</td>
+                    <td>{{ times[partida.time_visitante_id - 1].nome }}</td>
+                    <td>{{ partida.gols_visitante }}</td>
+                    <td>{{ partida.data_partida }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
         </table>
         {% else %}
             <p class="vazio">Nenhuma partida cadastrada ainda.</p>

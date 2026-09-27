@@ -3,7 +3,7 @@ from sqlalchemy.orm import declarative_base, relationship, sessionmaker, scoped_
 
 engine = create_engine("mysql+pymysql://root:Arthur_Pagotto1@localhost:3306/interclasse_db")
 
-SessionLocal = scoped_session(sessionmaker(bind=engine))
+db_session = scoped_session(sessionmaker(bind=engine))
 
 Base = declarative_base()
 

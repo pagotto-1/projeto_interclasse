@@ -28,12 +28,12 @@
                 <div class="campo">
                     <label for="posicao">Posição</label>
                     <select name="posicao" id="posicao">
-                        <option value="gol">Goleiro</option>
-                        <option value="zag">Zagueiro</option>
-                        <option value="vol">Volante</option>
-                        <option value="lat">Lateral</option>
-                        <option value="mei">Meio Campo</option>
-                        <option value="ata">Atacante</option>
+                        <option value="Goleiro">Goleiro</option>
+                        <option value="Zagueiro">Zagueiro</option>
+                        <option value="Volante">Volante</option>
+                        <option value="Lateral">Lateral</option>
+                        <option value="Meio Campo">Meio Campo</option>
+                        <option value="Atacante">Atacante</option>
                     </select>
                 </div>
             </div>
@@ -57,7 +57,24 @@
         <h2>Lista de Jogadores</h2>
         {% if jogadores %}
         <table>
-
+            <thead>
+                <tr>
+                    <th scope="col">Nome</th>
+                    <th scope="col">Número de Camisa</th>
+                    <th scope="col">Posição</th>
+                    <th scope="col">Time</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for jogador in jogadores %}
+                <tr>
+                    <td>{{ jogador.nome }}</td>
+                    <td>{{ jogador.numero_camisa }}</td>
+                    <td>{{ jogador.posicao }}</td>
+                    <td>{{ times[jogador.time_id - 1].nome }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
         </table>
         {% else %}
             <p class="vazio">Nenhum jogador cadastrado ainda.</p>

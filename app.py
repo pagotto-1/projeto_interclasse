@@ -8,36 +8,46 @@ app.secret_key = "lana-linda-incrivel-maravilhosa"
 
 @app.route("/")
 def dashboard():
-    lista_times = SessionLocal.execute(select(Time)).scalars().all()
+    times = db_session.execute(select(Time)).scalars().all()
+    jogadores = db_session.execute(select(Jogador)).scalars().all()
+    partidas = db_session.execute(select(Partida)).scalars().all()
 
     return render_template(
         "dashboard.html",
-        total_jogadores=0,
-        total_times=len(lista_times),
-        total_partidas=0
+        total_jogadores=len(jogadores),
+        total_times=len(times),
+        total_partidas=len(partidas)
     )
 
 @app.route("/jogadores")
 def listar_jogadores():
-    lista_times = SessionLocal.execute(select(Time)).scalars().all()
-    return render_template("jogadores.html", jogadores=[], times=lista_times)
+    jogadores = db_session.execute(select(Jogador)).scalars().all()
+    times = db_session.execute(select(Time)).scalars().all()
+
+    return render_template("jogadores.html", jogadores=jogadores, times=times)
 
 @app.route("/jogadores/novo", methods=["GET", "POST"])
 def novo_jogador():
+    times = db_session.execute(select(Time)).scalars().all()
+
     if request.method == "POST":
         nome_jogador = request.form.get("nome", "")
         numero_camisa = request.form.get("numero_camisa")
         posicao = request.form.get("posicao", "")
         time_id = request.form.get("time_id")
 
+        try:
+            numero_camisa = int(numero_camisa)
+            time_id = int(time_id)
+        except ValueError, TypeError:
+            flash('Número da camisa e time inválidos', 'error')
+            return redirect(url_for('novo_jogador'))
+
         if not nome_jogador:
             flash('Preencha o nome de jogador', 'error')
             return redirect(url_for('novo_jogador'))
         if not numero_camisa:
             flash('Preencha o numero da camisa', 'error')
-            return redirect(url_for('novo_jogador'))
-        elif numero_camisa < 0 or numero_camisa > 100:
-            flash('Insira um número válido (Entre 0 e 99)', 'error')
             return redirect(url_for('novo_jogador'))
         if not posicao:
             flash('Preencha a posição do jogador', 'error')
@@ -46,29 +56,40 @@ def novo_jogador():
             flash('Preencha o time do jogador', 'error')
             return redirect(url_for('novo_jogador'))
 
+        if len(nome_jogador) > 100:
+            flash('O nome do jogador deve ter no máximo 100 caracteres', 'error')
+            return redirect(url_for('novo_jogador'))
+        if numero_camisa < 0 or numero_camisa > 100:
+            flash('Insira um número válido (Entre 0 e 99)', 'error')
+            return redirect(url_for('novo_jogador'))
+        if len(posicao) > 50:
+            flash('Posição de jogador inválida', 'error')
+            return redirect(url_for('novo_jogador'))
+        if time_id < 0 or time_id > len(times):
+            flash('Time inválido', 'error')
+            return redirect(url_for('novo_jogador'))
+
         try:
             jogador_novo = Jogador(nome=nome_jogador, numero_camisa=numero_camisa, posicao=posicao, time_id=time_id)
-            SessionLocal.add(jogador_novo)
-            SessionLocal.commit()
+            db_session.add(jogador_novo)
+            db_session.commit()
             flash('Jogador cadastrado com sucesso', 'sucess')
             return redirect(url_for('listar_jogadores'))
         except SQLAlchemyError:
-            SessionLocal.rollback()
+            db_session.rollback()
             flash('Erro ao salvar jogador no banco de dados', 'error')
             return redirect(url_for('novo_jogador'))
         except:
-            SessionLocal.rollback()
+            db_session.rollback()
             flash('Erro inesperado', 'error')
             return redirect(url_for('novo_jogador'))
 
-    lista_times = SessionLocal.execute(select(Time)).scalars().all()
-
-    return render_template("jogadores.html", jogadores=[], times=lista_times)
+    return render_template("jogadores.html", jogadores=[], times=times)
 
 @app.route("/times")
 def listar_times():
-    lista_times = SessionLocal.execute(select(Time)).scalars().all()
-    return render_template("times.html", times=lista_times)
+    times = db_session.execute(select(Time)).scalars().all()
+    return render_template("times.html", times=times)
 
 @app.route("/times/novo", methods=["GET", "POST"])
 def novo_time():
@@ -89,29 +110,29 @@ def novo_time():
 
         try:
             time_novo = Time(nome=nome_time, turma=turma, responsavel=responsavel)
-            SessionLocal.add(time_novo)
-            SessionLocal.commit()
+            db_session.add(time_novo)
+            db_session.commit()
             flash('Time cadastrado com sucesso', 'sucess')
             return redirect(url_for('listar_times'))
         except SQLAlchemyError:
-            SessionLocal.rollback()
+            db_session.rollback()
             flash('Erro ao salvar time no banco de dados', 'error')
             return redirect(url_for('novo_time'))
         except:
-            SessionLocal.rollback()
+            db_session.rollback()
             flash('Erro inesperado', 'error')
             return redirect(url_for('novo_time'))
 
-    lista_times = SessionLocal.execute(select(Time)).scalars().all()
+    times = db_session.execute(select(Time)).scalars().all()
 
-    print(lista_times)
-
-    return render_template("times.html", times=lista_times)
+    return render_template("times.html", times=times)
 
 @app.route("/partidas")
 def listar_partidas():
+    partidas = db_session.execute(select(Partida)).scalars().all()
+    times = db_session.execute(select(Time)).scalars().all()
 
-    return render_template("partidas.html", partidas=[], times=[])
+    return render_template("partidas.html", partidas=partidas, times=times)
 
 @app.route("/partidas/nova", methods=["GET", "POST"])
 def nova_partida():
@@ -141,20 +162,22 @@ def nova_partida():
 
         try:
             partida_nova = Partida(time_casa_id=time_casa_id, time_visitante_id=time_visitante_id, gols_casa=gols_casa, gols_visitante=gols_visitante, data_partida=data_partida)
-            SessionLocal.add(partida_nova)
-            SessionLocal.commit()
+            db_session.add(partida_nova)
+            db_session.commit()
             flash('Partida cadastrado com sucesso', 'sucess')
             return redirect(url_for('listar_partidas'))
         except SQLAlchemyError:
-            SessionLocal.rollback()
+            db_session.rollback()
             flash('Erro ao salvar partida no banco de dados', 'error')
             return redirect(url_for('nova_partida'))
         except:
-            SessionLocal.rollback()
+            db_session.rollback()
             flash('Erro inesperado', 'error')
             return redirect(url_for('nova_partida'))
 
-    return render_template("partidas.html", partidas=[], times=[])
+    times = db_session.execute(select(Time)).scalars().all()
+
+    return render_template("partidas.html", partidas=[], times=times)
 
 if __name__ == "__main__":
     app.run(debug=True)
