@@ -45,6 +45,24 @@ def validar_time(nome_time, turma, responsavel, lista_turmas, times):
             flash('O time já existe ou já existiu', 'error')
             return redirect(url_for('novo_time'))
 
+def alter_time(nome_time, turma, responsavel, time_id):
+    time = select_time_id(time_id)
+    try:
+        time.nome = nome_time
+        time.turma = turma
+        time.responsavel = responsavel
+        SessionLocal.commit()
+        flash('Time alterado com sucesso', 'sucess')
+        return redirect(url_for('listar_times'))
+    except SQLAlchemyError:
+        SessionLocal.rollback()
+        flash('Erro ao salvar time no banco de dados', 'error')
+        return redirect(url_for('novo_time'))
+    except Exception:
+        SessionLocal.rollback()
+        flash('Erro inesperado', 'error')
+        return redirect(url_for('novo_time'))
+
 def insert_time(nome_time, turma, responsavel):
     try:
         time_novo = Time(nome=nome_time, turma=turma, responsavel=responsavel)

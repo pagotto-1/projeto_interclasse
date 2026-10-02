@@ -46,9 +46,15 @@ def excluir_time(time_id):
 
 @app.route("/times/alterar/<time_id>", methods=["GET", "POST"])
 def alterar_time(time_id):
-    time = tabela_time.select_time_id(time_id=time_id)
+    times = tabela_time.select_times()
     if request.method == "POST":
-        pass
+        nome_time = request.form.get("nome", "")
+        turma = request.form.get("turma", "")
+        responsavel = request.form.get("responsavel", "")
+
+        tabela_time.validar_time(nome_time=nome_time, turma=turma, responsavel=responsavel, lista_turmas=lista_turmas, times=times)
+        tabela_time.alter_time(nome_time=nome_time, turma=turma, responsavel=responsavel, time_id=time_id)
+
     times = tabela_time.select_times()
     time = tabela_time.select_time_id(time_id=time_id)
     return render_template("times.html", times=times, time=time, lista_turmas=lista_turmas)
@@ -127,7 +133,7 @@ def listar_partidas_excluidas():
 
 @app.route("/partidas/excluir/<partida_id>", methods=["GET", "POST"])
 def excluir_partida(partida_id):
-    partida = tabela_partida.select_partidas_id(partida_id=partida_id)
+    partida = tabela_partida.select_partida_id(partida_id=partida_id)
     if partida:
         partida.status_partida = False
         SessionLocal.commit()
@@ -135,16 +141,33 @@ def excluir_partida(partida_id):
 
 @app.route("/partidas/resgatar/<partida_id>", methods=["GET", "POST"])
 def resgatar_partida(partida_id):
-    partida = tabela_partida.select_partidas_id(partida_id=partida_id)
+    partida = tabela_partida.select_partida_id(partida_id=partida_id)
     if partida:
         partida.status_partida = True
         SessionLocal.commit()
     return redirect(url_for('listar_partidas_excluidas'))
 
+@app.route("/partidas/alterar/<partida_id>", methods=["GET", "POST"])
+def alterar_partida(partida_id):
+    times = tabela_time.select_times()
+    if request.method == "POST":
+        time_casa_id = request.form.get("time_casa_id")
+        time_visitante_id = request.form.get("time_visitante_id")
+        gols_casa = request.form.get("gols_casa")
+        gols_visitante = request.form.get("gols_visitante")
+        data_partida = request.form.get("data_partida", "")
+        data_partida = datetime.strptime(data_partida, "%Y-%m-%d").date()
+
+        tabela_partida.validar_partida(time_casa_id=time_casa_id, time_visitante_id=time_visitante_id, gols_casa=gols_casa, gols_visitante=gols_visitante, data_partida=data_partida, times=times)
+        tabela_partida.insert_partida(time_casa_id=time_casa_id, time_visitante_id=time_visitante_id, gols_casa=gols_casa, gols_visitante=gols_visitante, data_partida=data_partida)
+
+    partidas = tabela_partida.select_partidas()
+    partida = tabela_partida.select_partida_id(partida_id=partida_id)
+    return render_template("partidas.html", partidas=partidas, times=times, partida=partida)
+
 @app.route("/partidas/nova", methods=["GET", "POST"])
 def nova_partida():
     times = tabela_time.select_times()
-
     if request.method == "POST":
         time_casa_id = request.form.get("time_casa_id")
         time_visitante_id = request.form.get("time_visitante_id")
@@ -157,7 +180,7 @@ def nova_partida():
         tabela_partida.validar_partida(time_casa_id=time_casa_id, time_visitante_id=time_visitante_id, gols_casa=gols_casa, gols_visitante=gols_visitante, data_partida=data_partida, times=times)
         tabela_partida.insert_partida(time_casa_id=time_casa_id, time_visitante_id=time_visitante_id, gols_casa=gols_casa, gols_visitante=gols_visitante, data_partida=data_partida)
 
-    partidas = SessionLocal.execute(select(Partida)).scalars().all()
+    partidas = tabela_partida.select_partidas()
     return render_template("partidas.html", partidas=partidas, times=times)
 
 if __name__ == "__main__":

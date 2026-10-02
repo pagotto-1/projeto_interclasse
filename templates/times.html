@@ -45,14 +45,14 @@
     </section>
     {% endif %}
 
-    {% if request.endpoint == 'alterar-time' %}
+    {% if request.endpoint == 'alterar_time' %}
     <section class="painel formulario">
         <h2>Alterar Time</h2>
-        <form method="POST" action="{{ url_for('alterar_time') }}">
+        <form method="POST" action="{{ url_for('alterar_time', time_id=time.id) }}">
             <div class="linha-campos">
                 <div class="campo">
-                    <label for="nome">Nome do Time *</label>
-                    <input type="text" id="nome_alterar" name="nome" required>
+                    <label for="nome">Nome do Time</label>
+                    <input type="text" id="nome_alterar" name="nome" placeholder="{{ time.nome }}" required>
                 </div>
                 <div class="campo campo-cor">
                     <label for="turma">Turma</label>
@@ -65,10 +65,10 @@
             </div>
             <div class="campo">
                 <label for="responsavel">Responsável do Time</label>
-                <input type="text" id="responsavel_alterar" name="responsavel">
+                <input type="text" id="responsavel_alterar" name="responsavel" placeholder="{{ time.responsavel }}">
             </div>
             <div class="acoes-form">
-                <button type="submit" class="botao">Cadastrar</button>
+                <button type="submit" class="botao">Alterar</button>
                 <a href="{{ url_for('listar_times') }}" class="botao botao-secundario">Cancelar</a>
             </div>
         </form>

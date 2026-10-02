@@ -14,7 +14,7 @@ def selecet_partidas_excluidas():
     partidas = SessionLocal.execute(select(Partida).where(Partida.status_partida == 0)).scalars().all()
     return partidas
 
-def select_partidas_id(partida_id):
+def select_partida_id(partida_id):
     partida = SessionLocal.execute(select(Partida).where(Partida.id == partida_id)).scalar_one_or_none()
     return partida
 

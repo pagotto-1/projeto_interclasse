@@ -17,7 +17,6 @@
     {% if request.endpoint == 'nova_partida' %}
     <section class="painel formulario">
         <h2>Nova Partida</h2>
-
         {% if not times %}
             <p class="vazio">Cadastre pelo menos dois times antes de criar uma partida.</p>
         {% else %}
@@ -54,6 +53,53 @@
                 <div class="campo">
                     <label for="data_partida">Data</label>
                     <input type="date" id="data_partida" name="data_partida">
+                </div>
+            </div>
+            <div class="acoes-form">
+                <button type="submit" class="botao">Cadastrar</button>
+                <a href="{{ url_for('listar_partidas') }}" class="botao botao-secundario">Cancelar</a>
+            </div>
+        </form>
+        {% endif %}
+    </section>
+    {% endif %}
+
+    {% if request.endpoint == 'alterar_partida' %}
+    <section class="painel formulario">
+        <h2>Alterar Partida</h2>
+        <form method="POST" action="{{ url_for('alterar_partida', partida_id=partida.id) }}">
+            <div class="linha-campos">
+                <div class="campo">
+                    <label for="time_casa_id">Time da Casa</label>
+                    <select id="time_casa_id_alterar" name="time_casa_id" required>
+                        {% for time in times %}
+                            <option value="{{ time.id }}">{{ time.nome }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="campo">
+                    <label for="time_visitante_id">Time Visitante *</label>
+                    <select id="time_visitante_id_alterar" name="time_visitante_id" required>
+                        {% for time in times %}
+                            <option value="{{ time.id }}">{{ time.nome }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="linha-campos">
+                <div class="campo">
+                    <label for="gols_casa">Gols da Casa</label>
+                    <input type="number" id="gols_casa_alterar" name="gols_casa" min="0" value="0">
+                </div>
+                <div class="campo">
+                    <label for="gols_visitante">Gols do Visitante</label>
+                    <input type="number" id="gols_visitante_alterar" name="gols_visitante" min="0" value="0">
+                </div>
+            </div>
+            <div class="linha-campos">
+                <div class="campo">
+                    <label for="data_partida">Data</label>
+                    <input type="date" id="data_partida_alterar" name="data_partida">
                 </div>
             </div>
             <div class="acoes-form">
