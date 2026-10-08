@@ -64,53 +64,6 @@
     </section>
     {% endif %}
 
-    {% if request.endpoint == 'alterar_partida' %}
-    <section class="painel formulario">
-        <h2>Alterar Partida</h2>
-        <form method="POST" action="{{ url_for('alterar_partida', partida_id=partida.id) }}">
-            <div class="linha-campos">
-                <div class="campo">
-                    <label for="time_casa_id">Time da Casa</label>
-                    <select id="time_casa_id_alterar" name="time_casa_id" required>
-                        {% for time in times %}
-                            <option value="{{ time.id }}">{{ time.nome }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="campo">
-                    <label for="time_visitante_id">Time Visitante *</label>
-                    <select id="time_visitante_id_alterar" name="time_visitante_id" required>
-                        {% for time in times %}
-                            <option value="{{ time.id }}">{{ time.nome }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-            </div>
-            <div class="linha-campos">
-                <div class="campo">
-                    <label for="gols_casa">Gols da Casa</label>
-                    <input type="number" id="gols_casa_alterar" name="gols_casa" min="0" value="0">
-                </div>
-                <div class="campo">
-                    <label for="gols_visitante">Gols do Visitante</label>
-                    <input type="number" id="gols_visitante_alterar" name="gols_visitante" min="0" value="0">
-                </div>
-            </div>
-            <div class="linha-campos">
-                <div class="campo">
-                    <label for="data_partida">Data</label>
-                    <input type="date" id="data_partida_alterar" name="data_partida">
-                </div>
-            </div>
-            <div class="acoes-form">
-                <button type="submit" class="botao">Cadastrar</button>
-                <a href="{{ url_for('listar_partidas') }}" class="botao botao-secundario">Cancelar</a>
-            </div>
-        </form>
-        {% endif %}
-    </section>
-    {% endif %}
-
     {% if request.endpoint == 'listar_partidas' %}
         <section class="painel">
             <h2>Lista de Partidas</h2>
@@ -120,19 +73,19 @@
                     <tr>
                         <th scope="col">ID</th>
                         <th scope="col">Time da Casa</th>
-                        <th scope="col">Time Visitante</th>
                         <th scope="col">Placar</th>
+                        <th scope="col">Time Visitante</th>
                         <th scope="col">Data</th>
                         <th scope="col">Ações</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {% for partida in partidas %}
+                    {% for partida, time_casa, time_visitante in partidas %}
                         <tr>
                             <td>{{ partida.id }}</td>
-                            <td>{{ times[partida.time_casa_id - 1].nome }}</td>
-                            <td>{{ times[partida.time_visitante_id - 1].nome }}</td>
+                            <td>{{ time_casa.nome }}</td>
                             <td>{{ partida.gols_casa }} x {{ partida.gols_visitante }}</td>
+                            <td>{{ time_visitante.nome }}</td>
                             <td>{{ partida.data_partida }}</td>
                             <td><a href="{{ url_for('excluir_partida', partida_id=partida.id) }}" class="botao excluir">Excluir</a></td>
                         </tr>
@@ -157,19 +110,19 @@
                     <tr>
                         <th scope="col">ID</th>
                         <th scope="col">Time da Casa</th>
-                        <th scope="col">Time Visitante</th>
                         <th scope="col">Placar</th>
+                        <th scope="col">Time Visitante</th>
                         <th scope="col">Data</th>
                         <th scope="col">Ações</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {% for partida in partidas %}
+                    {% for partida, time_casa, time_visitante in partidas %}
                         <tr>
                             <td>{{ partida.id }}</td>
-                            <td>{{ times[partida.time_casa_id - 1].nome }}</td>
-                            <td>{{ times[partida.time_visitante_id - 1].nome }}</td>
+                            <td>{{ time_casa.nome }}</td>
                             <td>{{ partida.gols_casa }} x {{ partida.gols_visitante }}</td>
+                            <td>{{ time_visitante.nome }}</td>
                             <td>{{ partida.data_partida }}</td>
                             <td><a href="{{ url_for('resgatar_partida', partida_id=partida.id) }}" class="botao">Resgatar</a></td>
                         </tr>

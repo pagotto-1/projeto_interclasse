@@ -1,22 +1,51 @@
 from flask import redirect, url_for, flash
-from sqlalchemy import select
+from sqlalchemy import select, func
 from database import *
 from sqlalchemy.exc import SQLAlchemyError
 
 def select_times_ativos():
-    times = SessionLocal.execute(select(Time).where(Time.status_time == 1)).scalars().all()
+    times_select = (
+        select(Time, func.count(Jogador.id).label('jogadores')).
+        where(Time.status_time == 1).
+        outerjoin(Jogador, Jogador.time_id == Time.id).
+        group_by(Time.id)
+    )
+    times = SessionLocal.execute(times_select).all()
     return times
 
 def select_times_excluidos():
-    times = SessionLocal.execute(select(Time).where(Time.status_time == 0)).scalars().all()
+    times_select = (
+        select(Time, func.count(Jogador.id).label('jogadores')).
+        where(Time.status_time == 0).
+        outerjoin(Jogador, Jogador.time_id == Time.id).
+        group_by(Time.id)
+    )
+    times = SessionLocal.execute(times_select).all()
     return times
 
 def select_times():
-    times = SessionLocal.execute(select(Time)).scalars().all()
+    times_select = (
+        select(Time, func.count(Time.id).label('jogadores')).
+        outerjoin(Jogador, Jogador.time_id == Time.id).
+        group_by(Time.id)
+    )
+    times = SessionLocal.execute(times_select).all()
     return times
 
+def select_quantidade_times():
+    quantidade_select = (
+        select(func.count(Time.id)).
+        where(Time.status_time == 1)
+    )
+    quantidade_times = SessionLocal.execute(quantidade_select).scalar()
+    return quantidade_times
+
 def select_time_id(time_id):
-    time = SessionLocal.execute(select(Time).where(Time.id == time_id)).scalar_one_or_none()
+    time_select = (
+        select(Time).
+        where(Time.id == time_id)
+    )
+    time = SessionLocal.execute(time_select).scalar_one_or_none()
     return time
 
 def validar_time(nome_time, turma, responsavel, lista_turmas, times):
@@ -44,24 +73,6 @@ def validar_time(nome_time, turma, responsavel, lista_turmas, times):
         if "".join(time.nome) == "".join(nome_time):
             flash('O time já existe ou já existiu', 'error')
             return redirect(url_for('novo_time'))
-
-def alter_time(nome_time, turma, responsavel, time_id):
-    time = select_time_id(time_id)
-    try:
-        time.nome = nome_time
-        time.turma = turma
-        time.responsavel = responsavel
-        SessionLocal.commit()
-        flash('Time alterado com sucesso', 'sucess')
-        return redirect(url_for('listar_times'))
-    except SQLAlchemyError:
-        SessionLocal.rollback()
-        flash('Erro ao salvar time no banco de dados', 'error')
-        return redirect(url_for('novo_time'))
-    except Exception:
-        SessionLocal.rollback()
-        flash('Erro inesperado', 'error')
-        return redirect(url_for('novo_time'))
 
 def insert_time(nome_time, turma, responsavel):
     try:

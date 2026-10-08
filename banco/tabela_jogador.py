@@ -1,22 +1,48 @@
 from flask import redirect, url_for, flash
-from sqlalchemy import select
+from sqlalchemy import select, func
 from database import *
 from sqlalchemy.exc import SQLAlchemyError
 
 def select_jogadores_ativos():
-    jogadores = SessionLocal.execute(select(Jogador).where(Jogador.status_jogador == 1)).scalars().all()
+    jogadores_select = (
+        select(Jogador, Time).
+        where(Jogador.status_jogador == 1).
+        join(Time, Jogador.time_id == Time.id)
+    )
+    jogadores = SessionLocal.execute(jogadores_select).all()
     return jogadores
 
 def select_jogadores_excluidos():
-    jogadores = SessionLocal.execute(select(Jogador).where(Jogador.status_jogador == 0)).scalars().all()
+    jogadores_select = (
+        select(Jogador, Time).
+        where(Jogador.status_jogador == 0).
+        join(Time, Jogador.time_id == Time.id)
+    )
+    jogadores = SessionLocal.execute(jogadores_select).all()
     return jogadores
 
 def select_jogadores():
-    jogadores = SessionLocal.execute(select(Jogador)).scalars().all()
+    jogadores_select = (
+        select(Jogador, Time).
+        join(Time, Jogador.time_id == Time.id)
+    )
+    jogadores = SessionLocal.execute(jogadores_select).all()
     return jogadores
 
+def select_quantidade_jogadores():
+    quantidade_select = (
+        select(func.count(Jogador.id)).
+        where(Jogador.status_jogador == 1)
+    )
+    quantidade_jogadores = SessionLocal.execute(quantidade_select).scalar()
+    return quantidade_jogadores
+
 def select_jogador_id(jogador_id):
-    jogador = SessionLocal.execute(select(Jogador).where(Jogador.id == jogador_id)).scalar_one_or_none()
+    jogador_select = (
+        select(Jogador).
+        where(Jogador.id == jogador_id)
+    )
+    jogador = SessionLocal.execute(jogador_select).scalar_one_or_none()
     return jogador
 
 def validar_jogador(nome_jogador, numero_camisa, posicao, time_id, lista_posicoes, times, jogadores):
