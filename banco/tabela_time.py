@@ -2,6 +2,7 @@ from flask import redirect, url_for, flash
 from sqlalchemy import select, func
 from database import *
 from sqlalchemy.exc import SQLAlchemyError
+from banco import *
 
 def select_times_ativos():
     times_select = (
@@ -69,10 +70,18 @@ def validar_time(nome_time, turma, responsavel, lista_turmas, times):
         flash('O nome do responsável é muito longo', 'error')
         return redirect(url_for('novo_time'))
 
-    for time in times:
+    for time, jogadores in times:
         if "".join(time.nome) == "".join(nome_time):
             flash('O time já existe ou já existiu', 'error')
             return redirect(url_for('novo_time'))
+
+def insert_jogadores(jogadores_ids, time):
+    if jogadores_ids:
+        for jogador_id in jogadores_ids:
+            jogador = tabela_jogador.select_jogador_id(jogador_id)
+            jogador.time_id = time.id
+            SessionLocal.add(jogador)
+            SessionLocal.commit()
 
 def insert_time(nome_time, turma, responsavel):
     try:
@@ -80,7 +89,7 @@ def insert_time(nome_time, turma, responsavel):
         SessionLocal.add(time_novo)
         SessionLocal.commit()
         flash('Time cadastrado com sucesso', 'sucess')
-        return redirect(url_for('listar_times'))
+        return time_novo
     except SQLAlchemyError:
         SessionLocal.rollback()
         flash('Erro ao salvar time no banco de dados', 'error')

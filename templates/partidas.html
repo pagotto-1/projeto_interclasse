@@ -25,7 +25,7 @@
                 <div class="campo">
                     <label for="time_casa_id">Time da Casa *</label>
                     <select id="time_casa_id" name="time_casa_id" required>
-                        {% for time in times %}
+                        {% for time, jogadores in times %}
                             <option value="{{ time.id }}">{{ time.nome }}</option>
                         {% endfor %}
                     </select>
@@ -33,7 +33,7 @@
                 <div class="campo">
                     <label for="time_visitante_id">Time Visitante *</label>
                     <select id="time_visitante_id" name="time_visitante_id" required>
-                        {% for time in times %}
+                        {% for time, jogadores in times %}
                             <option value="{{ time.id }}">{{ time.nome }}</option>
                         {% endfor %}
                     </select>

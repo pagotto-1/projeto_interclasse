@@ -29,6 +29,15 @@ def select_jogadores():
     jogadores = SessionLocal.execute(jogadores_select).all()
     return jogadores
 
+def select_jogadores_time(time_id):
+    jogadores_select = (
+        select(Jogador, Time).
+        where(Jogador.time_id == time_id).
+        join(Time, Jogador.time_id == Time.id)
+    )
+    jogadores = SessionLocal.execute(jogadores_select).all()
+    return jogadores
+
 def select_quantidade_jogadores():
     quantidade_select = (
         select(func.count(Jogador.id)).

@@ -5,6 +5,8 @@ from database import *
 from sqlalchemy.exc import SQLAlchemyError
 from datetime import datetime
 
+from database import Partida
+
 app = Flask(__name__)
 app.secret_key = "lana-linda-incrivel-maravilhosa"
 
@@ -31,6 +33,33 @@ def listar_times_excluidos():
     times_excluidos = tabela_time.select_times_excluidos()
     return render_template("times.html", times=times_excluidos)
 
+@app.route("/times/<time_id>")
+def detalhes_time(time_id):
+    time = tabela_time.select_time_id(time_id)
+    jogadores = tabela_jogador.select_jogadores_time(time_id)
+    partidas = tabela_partida.select_partidas_time(time_id)
+
+    vitorias = 0
+    empates = 0
+    derrotas = 0
+    for partida, time_casa, time_visitante in partidas:
+        if time_casa.id == time.id:
+            if partida.gols_casa > partida.gols_visitante:
+                vitorias += 1
+            elif partida.gols_casa == partida.gols_visitante:
+                empates += 1
+            else:
+                derrotas += 1
+        else:
+            if partida.gols_casa > partida.gols_visitante:
+                derrotas += 1
+            elif partida.gols_casa == partida.gols_visitante:
+                empates += 1
+            else:
+                derrotas += 1
+
+    return render_template("time_detalhes.html", time=time, jogadores=jogadores, quantidade_jogadores=len(jogadores), partidas=partidas, quantidade_partidas=len(partidas), vitorias=vitorias, empates=empates, derrotas=derrotas)
+
 @app.route("/times/resgatar/<time_id>", methods=["GET", "POST"])
 def resgatar_time(time_id):
     time_excluido = tabela_time.select_time_id(time_id=time_id)
@@ -55,12 +84,16 @@ def novo_time():
         nome_time = request.form.get("nome", "")
         turma = request.form.get("turma", "")
         responsavel = request.form.get("responsavel", "")
+        jogadores_ids = request.form.getlist("jogadores")
 
         tabela_time.validar_time(nome_time=nome_time, turma=turma, responsavel=responsavel, lista_turmas=lista_turmas, times=times)
-        tabela_time.insert_time(nome_time=nome_time, turma=turma, responsavel=responsavel)
+        time = tabela_time.insert_time(nome_time=nome_time, turma=turma, responsavel=responsavel)
+
+        tabela_time.insert_jogadores(jogadores_ids=jogadores_ids, time=time)
 
     times = tabela_time.select_times()
-    return render_template("times.html", times=times, lista_turmas=lista_turmas)
+    jogadores = tabela_jogador.select_jogadores()
+    return render_template("times.html", times=times, jogadores=jogadores, lista_turmas=lista_turmas)
 
 @app.route("/jogadores")
 def listar_jogadores():

@@ -4,6 +4,9 @@ from database import *
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import aliased
 
+from database import Partida
+
+
 def select_partidas_ativas():
     TimeCasa = aliased(Time)
     TimeVisitante = aliased(Time)
@@ -45,6 +48,19 @@ def select_partidas():
     partidas_select = (
         select(Partida, TimeCasa, TimeVisitante).
         where(Partida.status_partida == 1).
+        join(TimeCasa, Partida.time_casa_id == TimeCasa.id).
+        join(TimeVisitante, Partida.time_visitante_id == TimeVisitante.id)
+    )
+    partidas = SessionLocal.execute(partidas_select).all()
+    return partidas
+
+def select_partidas_time(time_id):
+    TimeCasa = aliased(Time)
+    TimeVisitante = aliased(Time)
+
+    partidas_select = (
+        select(Partida, TimeCasa, TimeVisitante).
+        where(or_(Partida.time_casa_id == time_id, Partida.time_visitante_id == time_id)).
         join(TimeCasa, Partida.time_casa_id == TimeCasa.id).
         join(TimeVisitante, Partida.time_visitante_id == TimeVisitante.id)
     )

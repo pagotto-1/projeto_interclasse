@@ -204,6 +204,10 @@ tbody tr:hover {
     padding: 12px 0;
 }
 
+.nome-time {
+    color: var(--cor-texto);
+}
+
 /* BOTÕES */
 .botao {
     display: inline-block;
@@ -255,6 +259,8 @@ tbody tr:hover {
 .campo {
     margin-bottom: 16px;
     flex: 1;
+    max-height: 200px;
+    overflow: auto;
 }
 
 .linha-campos {

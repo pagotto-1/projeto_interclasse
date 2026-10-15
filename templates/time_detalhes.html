@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% block titulo %}{{ time.nome }}{% endblock %}
+{% block conteudo %}
+<div class="cabecalho-pagina">
+    <div>
+        <a href="{{ url_for('listar_times') }}" class="botao botao-secundario">
+            &larr; Voltar para Times
+        </a>
+        <h1>{{ time.nome }}</h1>
+        <p class="subtitulo">Turma: {{ time.turma or '-' }}</p>
+        <p class="subtitulo">Responsável: {{ time.responsavel or '-' }}</p>
+    </div>
+    <a href="{{ url_for('detalhes_time', time_id=time.id) }}"
+       class="botao botao-secundario">Editar Time</a>
+</div>
+<!-- Resumo de desempenho -->
+<div class="cartoes cartoes-compactos">
+    <div class="cartao">
+        <div class="cartao-valor">{{ quantidade_partidas }}</div>
+        <div class="cartao-label">Partidas</div>
+    </div>
+    <div class="cartao">
+        <div class="cartao-valor">{{ vitorias }}</div>
+        <div class="cartao-label">Vitórias</div>
+    </div>
+    <div class="cartao">
+        <div class="cartao-valor">{{ empates }}</div>
+        <div class="cartao-label">Empates</div>
+    </div>
+    <div class="cartao">
+        <div class="cartao-valor">{{ derrotas }}</div>
+        <div class="cartao-label">Derrotas</div>
+    </div>
+</div>
+<!-- Jogadores do time -->
+<section class="painel">
+    <h2>Jogadores ({{quantidade_jogadores}})</h2>
+    {% if jogadores %}
+    <table>
+        <thead>
+            <tr>
+                <th scope="col">ID</th>
+                <th scope="col">Nome</th>
+                <th scope="col">Número</th>
+                <th scope="col">Posição</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for jogador, time in jogadores %}
+                <tr>
+                    <td>{{ jogador.id }}</td>
+                    <td>{{ jogador.nome }}</td>
+                    <td>{{ jogador.numero_camisa }}</td>
+                    <td>{{ jogador.posicao }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+        <p class="vazio">Este time ainda não possui jogadores.</p>
+    {% endif %}
+</section>
+<!-- Partidas disputadas -->
+<section class="painel">
+    <h2>Partidas disputadas ({{ quantidade_partidas }})</h2>
+    {% if partidas %}
+    <table>
+        <thead>
+            <tr>
+                <th scope="col">ID</th>
+                <th scope="col">Time da Casa</th>
+                <th scope="col">Placar</th>
+                <th scope="col">Time Visitante</th>
+                <th scope="col">Data</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for partida, time_casa, time_visitante in partidas %}
+                <tr>
+                    <td>{{ partida.id }}</td>
+                    <td>{{ time_casa.nome }}</td>
+                    <td>{{ partida.gols_casa }} x {{ partida.gols_visitante }}</td>
+                    <td>{{ time_visitante.nome }}</td>
+                    <td>{{ partida.data_partida }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p class="vazio">Este time ainda não disputou partidas.</p>
+    {% endif %}
+</section>
+{% endblock %}
