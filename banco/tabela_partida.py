@@ -4,7 +4,6 @@ from database import *
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import aliased
 
-
 def select_partidas_ativas():
     TimeCasa = aliased(Time)
     TimeVisitante = aliased(Time)

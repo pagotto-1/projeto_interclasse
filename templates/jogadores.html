@@ -14,28 +14,34 @@
         </div>
     </div>
 
-    {% if request.endpoint == 'novo_jogador' %}
+    {% if request.endpoint == 'novo_jogador' or editar %}
     <section class="painel formulario">
-        <h2>Novo Jogador</h2>
-        <form method="POST" action="{{ url_for('novo_jogador') }}">
+        <h2>{% if editar %} Editar Jogador {% else %} Novo Jogador {% endif %}</h2>
+        <!-- Estrutura if inline: ação true if condição else ação false -->
+        <form method="POST" action="{{ url_for('editar_jogador', jogador_id=editar.id) if editar else url_for('novo_jogador') }}">
             <div class="campo">
                 <label for="nome">Nome *</label>
-                <input type="text" id="nome" name="nome">
+                <input type="text" id="nome" name="nome" value="{{ editar.nome if editar else '' }}">
             </div>
             <div class="linha-campos">
                 <div class="campo">
                     <label for="numero_camisa">Número de Camisa</label>
-                    <input type="number" id="numero_camisa" name="numero_camisa" min="0" max="99">
+                    <input type="number" id="numero_camisa" name="numero_camisa" min="0" max="99" value="{{ editar.numero_camisa if editar else '' }}">
                 </div>
                 <div class="campo">
                     <label for="posicao">Posição</label>
                     <select name="posicao" id="posicao">
-                        <option value="{{ lista_posicoes[0] }}">Goleiro</option>
-                        <option value="{{ lista_posicoes[1] }}">Zagueiro</option>
-                        <option value="{{ lista_posicoes[2] }}">Volante</option>
-                        <option value="{{ lista_posicoes[3] }}">Lateral</option>
-                        <option value="{{ lista_posicoes[4] }}">Meio Campo</option>
-                        <option value="{{ lista_posicoes[5] }}">Atacante</option>
+                        {% for posicao in lista_posicoes%}
+                            {% if editar %}
+                                {% if posicao == editar.posicao %}
+                                    <option value="{{ posicao }}" selected>{{ posicao }}</option>
+                                {% else %}
+                                    <option value="{{ posicao }}">{{ posicao }}</option>
+                                {% endif %}
+                            {% else %}
+                                <option value="{{ posicao }}">{{ posicao }}</option>
+                            {% endif %}
+                        {% endfor%}
                     </select>
                 </div>
             </div>
@@ -44,7 +50,15 @@
                 <select id="time_id" name="time_id">
                     {% if times %}
                         {% for time, jogadores in times %}
-                            <option value="{{ time.id }}">{{ time.nome }}</option>
+                            {% if editar %}
+                                {% if time.id == editar.time_id %}
+                                    <option value="{{ time.id }}" selected>{{ time.nome }}</option>
+                                {% else %}
+                                    <option value="{{ time.id }}">{{ time.nome }}</option>
+                                {% endif %}
+                            {% else %}
+                                <option value="{{ time.id }}">{{ time.nome }}</option>
+                            {% endif %}
                         {% endfor %}
                     {% else %}
                         <option value="" class="vazio">Sem time</option>
@@ -52,7 +66,7 @@
                 </select>
             </div>
             <div class="acoes-form">
-                <button type="submit" class="botao">Cadastrar</button>
+                <button type="submit" class="botao">{% if editar %}Editar{% else %}Cadastrar{% endif %}</button>
                 <a href="{{ url_for('listar_jogadores') }}" class="botao botao-secundario">Cancelar</a>
             </div>
         </form>
@@ -82,7 +96,7 @@
                             <td>{{ jogador.numero_camisa }}</td>
                             <td>{{ jogador.posicao }}</td>
                             <td>{{ time.nome }}</td>
-                            <td><a href="{{ url_for('excluir_jogador', jogador_id=jogador.id) }}" class="botao excluir">Excluir</a></td>
+                            <td><a href="{{ url_for('editar_jogador', jogador_id=jogador.id) }}" class="botao">Editar</a> <a href="{{ url_for('excluir_jogador', jogador_id=jogador.id) }}" class="botao excluir">Excluir</a></td>
                         </tr>
                     {% endfor %}
                 </tbody>

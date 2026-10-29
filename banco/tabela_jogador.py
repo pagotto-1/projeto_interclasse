@@ -60,45 +60,41 @@ def validar_jogador(nome_jogador, numero_camisa, posicao, time_id, lista_posicoe
         time_id = int(time_id)
     except ValueError, TypeError:
         flash('Número de camisa ou time inválido', 'error')
-        return redirect(url_for('novo_jogador'))
+        return True
 
     if not nome_jogador:
         flash('Preencha o nome de jogador', 'error')
-        return redirect(url_for('novo_jogador'))
+        return True
     if not numero_camisa:
         flash('Preencha o numero da camisa', 'error')
-        return redirect(url_for('novo_jogador'))
+        return True
     if not posicao:
         flash('Preencha a posição do jogador', 'error')
-        return redirect(url_for('novo_jogador'))
+        return True
     if not time_id:
         flash('Preencha o time do jogador', 'error')
-        return redirect(url_for('novo_jogador'))
+        return True
 
     if len(nome_jogador) > 100:
         flash('O nome é muito longo, digite um nome menor', 'error')
-        return redirect(url_for('novo_jogador'))
+        return True
     if numero_camisa < 0 or numero_camisa >= 100:
         flash('O número da camisa deve estar entre 0 e 99', 'error')
-        return redirect(url_for('novo_jogador'))
+        return True
     if posicao not in lista_posicoes:
         flash('A posição não existe', 'error')
-        return redirect(url_for('novo_jogador'))
+        return True
     if time_id <= 0 or time_id > len(times):
         flash('O time selecionado não existe', 'error')
-        return redirect(url_for('novo_jogador'))
-
-    for jogador in jogadores:
-        if "".join(jogador.nome) == "".join(nome_jogador):
-            flash('Este jogador já existe', 'error')
-            return redirect(url_for('novo_jogador'))
+        return True
+    return False
 
 def insert_jogador(nome_jogador, numero_camisa, posicao, time_id):
     try:
         jogador_novo = Jogador(nome=nome_jogador, numero_camisa=numero_camisa, posicao=posicao, time_id=time_id)
         SessionLocal.add(jogador_novo)
         SessionLocal.commit()
-        flash('Jogador cadastrado com sucesso', 'sucess')
+        flash('Jogador cadastrado com sucesso', 'success')
         return redirect(url_for('listar_jogadores'))
     except SQLAlchemyError:
         SessionLocal.rollback()

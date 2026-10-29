@@ -1,11 +1,7 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, g
-from sqlalchemy import select
+from flask import Flask, render_template, request, redirect, url_for, flash
 from banco import tabela_time, tabela_jogador, tabela_partida
 from database import *
-from sqlalchemy.exc import SQLAlchemyError
 from datetime import datetime
-
-from database import Partida
 
 app = Flask(__name__)
 app.secret_key = "lana-linda-incrivel-maravilhosa"
@@ -139,6 +135,35 @@ def novo_jogador():
 
     jogadores = tabela_jogador.select_jogadores()
     return render_template("jogadores.html", jogadores=jogadores, times=times, lista_posicoes=lista_posicoes)
+
+@app.route("/jogadores/editar/<jogador_id>", methods=["GET", "POST"])
+def editar_jogador(jogador_id):
+    # Buscar jogador no banco
+    jogador = tabela_jogador.select_jogador_id(jogador_id)
+    jogadores = tabela_jogador.select_jogadores()
+    times = tabela_time.select_times()
+    # Salvar as informações
+    if request.method == "POST":
+        nome_jogador = request.form.get("nome", "")
+        numero_camisa = request.form.get("numero_camisa")
+        posicao = request.form.get("posicao", "")
+        time_id = request.form.get("time_id")
+
+        erro = tabela_jogador.validar_jogador(nome_jogador=nome_jogador, numero_camisa=numero_camisa, posicao=posicao, time_id=time_id, lista_posicoes=lista_posicoes, times=times, jogadores=jogadores)
+        if not erro:
+            jogador.nome = nome_jogador
+            jogador.numero_camisa = numero_camisa
+            jogador.posicao = posicao
+            jogador.time_id = time_id
+            SessionLocal.commit()
+
+            flash("Jogador editado com sucesso", "success")
+            return redirect(url_for('listar_jogadores'))
+
+    # Carregar as informações
+    jogadores = tabela_jogador.select_jogadores_ativos()
+    times = tabela_time.select_times()
+    return render_template("jogadores.html", jogadores=jogadores, editar=jogador, lista_posicoes=lista_posicoes, times=times)
 
 @app.route("/partidas")
 def listar_partidas():

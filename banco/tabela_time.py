@@ -2,7 +2,6 @@ from flask import redirect, url_for, flash
 from sqlalchemy import select, func
 from database import *
 from sqlalchemy.exc import SQLAlchemyError
-from banco import *
 
 def select_times_ativos():
     times_select = (

@@ -336,13 +336,13 @@ input:focus, select:focus {
     font-size: 0.9rem;
 }
 
-.flash-sucesso {
+.flash-success {
     background-color: var(--cor-sucesso-fundo);
     color: var(--cor-sucesso);
     border: 1px solid #9ae6b4;
 }
 
-.flash-erro {
+.flash-error {
     background-color: var(--cor-erro-fundo);
     color: var(--cor-erro);
     border: 1px solid #feb2b2;
