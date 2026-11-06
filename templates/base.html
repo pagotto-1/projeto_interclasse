@@ -38,6 +38,12 @@
                        <span class="icone">⚽</span> Partidas
                     </a>
                 </li>
+                <li>
+                    <a href="{{ url_for('listar_movimentacoes') }}"
+                       class="{{ 'ativo' if 'movimentacao' in request.endpoint else '' }}">
+                        <span class="icone">🔁</span> Movimentações
+                    </a>
+                </li>
             </ul>
         </nav>
 

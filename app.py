@@ -1,15 +1,103 @@
 from flask import Flask, render_template, request, redirect, url_for, flash
-from banco import tabela_time, tabela_jogador, tabela_partida
+from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.testing.pickleable import User
+from sqlalchemy import select
+from banco import tabela_time, tabela_jogador, tabela_partida, tabela_movimentacao
 from database import *
 from datetime import datetime
-
-app = Flask(__name__)
-app.secret_key = "lana-linda-incrivel-maravilhosa"
+from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 
 lista_posicoes = ['Goleiro', 'Zagueiro', 'Volante', 'Lateral', 'Meia', 'Atacante']
 lista_turmas = ['6 Fundamental', '7 Fundamental', '8 Fundamental', '9 Fundamental', '1 Médio', '2 Médio', '3 Médio']
 
+app = Flask(__name__)
+# não pode deixar a senha aqui quando a aplicação for disponibilizada
+app.secret_key = "lana-linda-incrivel-maravilhosa"
+
+login_manager = LoginManager(app)
+login_manager.login_view = 'login'
+login_manager.login_message = 'Faça login para acessar'
+
+@app.teardown_appcontext
+def shutdown_session(exception=None):
+    SessionLocal.remove()
+
+@login_manager.user_loader
+def load_user(user_id):
+    return SessionLocal.get(Usuario, int(user_id))
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if request.method == "POST":
+        email = request.form.get("email", "").strip()
+        senha = request.form.get("senha")
+
+        if not email:
+            flash("Insira um email", "error")
+            return redirect(url_for("login"))
+        if not senha:
+            flash("Insira a senha", "error")
+            return redirect(url_for("login"))
+
+        usuario = SessionLocal.execute(select(Usuario).where(Usuario.email == email)).scalar()
+        if not usuario:
+            flash("Email não encontrado", "error")
+            return redirect(url_for("login"))
+        if usuario and usuario.check_password(senha):
+            login_user(usuario)
+            return redirect(url_for("dashboard"))
+        else:
+            flash("Senha incorreta", "error")
+            return redirect(url_for("login"))
+
+    return render_template("login.html", registro=request.args.get('registro') == True)
+
+@app.route("/registro", methods=["GET", "POST"])
+def registro():
+    if request.method == "POST":
+        nome = request.form.get("nome", "").strip()
+        email = request.form.get("email", "").strip()
+        senha = request.form.get("senha", "").strip()
+
+        if not nome and not email and not senha:
+            flash("Preencha todos os campos", "error")
+            return redirect(url_for("registro"))
+        if not nome:
+            flash("Preencha o nome", "error")
+            return redirect(url_for("registro"))
+        if not email:
+            flash("Insira um email", "error")
+            return redirect(url_for("registro"))
+        if not senha:
+            flash("Insira a senha", "error")
+            return redirect(url_for("registro"))
+
+        email_existente = SessionLocal.execute(select(Usuario).where(Usuario.email == email)).scalar_one_or_none()
+        if email_existente:
+            flash("O email já está sendo utilizado, insira outro", "error")
+            return redirect(url_for("registro"))
+        try:
+            usuario_novo = Usuario(nome=nome, email=email)
+            usuario_novo.set_password(senha)
+            SessionLocal.add(usuario_novo)
+            SessionLocal.commit()
+            login_user(usuario_novo)
+            flash("Usuário cadastrado com sucesso", "success")
+            return redirect(url_for("dashboard"))
+        except SQLAlchemyError as e:
+            SessionLocal.rollback()
+            print(e)
+            flash("Erro ao cadastrar usuário", "error")
+            return redirect(url_for("registro"))
+        except Exception:
+            SessionLocal.rollback()
+            flash("Erro inesperado ao cadastrar usuário", "error")
+            return redirect(url_for("registro"))
+
+    return render_template("login.html", registro=True)
+
 @app.route("/")
+@login_required
 def dashboard():
     quantidade_jogadores = tabela_jogador.select_quantidade_jogadores()
     quantidade_times = tabela_time.select_quantidade_times()
@@ -209,6 +297,37 @@ def nova_partida():
 
     partidas = tabela_partida.select_partidas()
     return render_template("partidas.html", partidas=partidas, times=times)
+
+@app.route("/movimentacoes")
+def listar_movimentacoes():
+    times = tabela_time.select_times()
+    movimentacoes = tabela_movimentacao.select_todos()
+    jogadores = tabela_jogador.select_jogadores_ativos()
+    return render_template("movimentacoes.html", times=times, movimentacoes=movimentacoes, jogadores=jogadores)
+
+@app.route("/movimentacoes/nova", methods=["GET", "POST"])
+@app.route("/movimentacoes/nova/<id_jogador>")
+def nova_movimentacao(id_jogador=None):
+    if request.method == "POST":
+        if id_jogador:
+            jogador_id = id_jogador
+        else:
+            jogador_id = request.form.get("jogador_id")
+        time_destino_id = request.form.get("time_destino_id")
+
+        if not jogador_id:
+            flash("Selecione o jogador", "error")
+            return redirect(url_for('nova_movimentacao'))
+        if not time_destino_id:
+            flash("Selecione o time de destino", "error")
+            return redirect(url_for('nova_movimentacao'))
+
+        tabela_movimentacao.salvar(jogador_id=jogador_id, time_destino_id=time_destino_id)
+
+    movimentacoes = tabela_movimentacao.select_todos()
+    jogadores = tabela_jogador.select_jogadores()
+    times = tabela_time.select_times()
+    return render_template("movimentacoes.html", movimentacoes=movimentacoes, jogadores=jogadores, times=times, jogador_selecionado_id=id_jogador)
 
 if __name__ == "__main__":
     app.run(debug=True)

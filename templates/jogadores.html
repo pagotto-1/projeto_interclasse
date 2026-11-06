@@ -96,7 +96,11 @@
                             <td>{{ jogador.numero_camisa }}</td>
                             <td>{{ jogador.posicao }}</td>
                             <td>{{ time.nome }}</td>
-                            <td><a href="{{ url_for('editar_jogador', jogador_id=jogador.id) }}" class="botao">Editar</a> <a href="{{ url_for('excluir_jogador', jogador_id=jogador.id) }}" class="botao excluir">Excluir</a></td>
+                            <td>
+                                <a href="{{ url_for('editar_jogador', jogador_id=jogador.id) }}" class="botao">Editar</a>
+                                <a href="{{ url_for('nova_movimentacao', id_jogador=jogador.id) }}" class="botao">Movimentar</a>
+                                <a href="{{ url_for('excluir_jogador', jogador_id=jogador.id) }}" class="botao excluir">Excluir</a>
+                            </td>
                         </tr>
                     {% endfor %}
                 </tbody>
