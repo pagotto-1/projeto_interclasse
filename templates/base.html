@@ -10,6 +10,7 @@
 
     <div class="layout">
 
+        {% if request.endpoint != 'login' %}
         <!-- MENU VERTICAL -->
         <nav class="menu-lateral">
             <div class="menu-titulo">🏆 Interclasse</div>
@@ -46,7 +47,7 @@
                 </li>
             </ul>
         </nav>
-
+        {% endif %}
         <!-- CONTEÚDO -->
         <main class="conteudo">
             {% with mensagens = get_flashed_messages(with_categories=true) %}
